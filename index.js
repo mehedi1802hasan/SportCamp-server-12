@@ -30,7 +30,8 @@ async function run() {
     // Access the MongoDB collections and define routes here
     const usersCollection = client.db('sportCamp').collection('users');
    const classCollection =client.db('sportCamp').collection('classes')
-  
+   const selectedCollection =client.db('sportCamp').collection('selectedClass')
+
    
 
     app.get('/users', async (req, res) => {
@@ -89,6 +90,14 @@ app.get('/users/instructors', async (req, res) => {
     const result =await classCollection.insertOne(user);
     res.send(result);
    })
+
+// post for myselected component by classess
+app.post ('/myselectedclass',async(req,res)=>{
+  const selectedClass=req.body;
+  const result = await selectedCollection.insertOne(selectedClass);
+  res.send(result);
+})
+
 
    // get data in the myClasses 
    app.get('/classes/:instructorEmail',async(req,res)=>{
