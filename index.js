@@ -29,6 +29,10 @@ async function run() {
 
     // Access the MongoDB collections and define routes here
     const usersCollection = client.db('sportCamp').collection('users');
+   const classCollection =client.db('sportCamp').collection('classes')
+  
+   
+
     app.get('/users', async (req, res) => {
         const result = await usersCollection.find().toArray();
         res.send(result);
@@ -73,12 +77,27 @@ async function run() {
     const result =await usersCollection.updateOne(filter,updateDoc);
     res.send(result)
   })
+/// geting for instructor page instructor list by 'role' ways..
+app.get('/users/instructors', async (req, res) => {
+  const instructors = await usersCollection.find({ role: 'instructor' }).toArray();
+  res.send(instructors);
+});
 
-  /// geting for instructor page instructor list by 'role' ways..
-  app.get('/users/instructors', async (req, res) => {
-    const instructors = await usersCollection.find({ role: 'instructor' }).toArray();
-    res.send(instructors);
-  });
+  //posted for addClass by instructor..
+  app.post('/classes',async(req,res)=>{
+    const user =req.body;
+    const result =await classCollection.insertOne(user);
+    res.send(result);
+   })
+
+   // get data in the myClasses 
+   app.get('/classes/:instructorEmail',async(req,res)=>{
+    const cursor = classCollection.find();
+    const result = await cursor.toArray();
+    res.send(result)
+   })
+
+  
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
