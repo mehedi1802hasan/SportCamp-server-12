@@ -91,14 +91,6 @@ app.get('/users/instructors', async (req, res) => {
     res.send(result);
    })
 
-// post for myselected component by classess
-app.post ('/myselectedclass',async(req,res)=>{
-  const selectedClass=req.body;
-  const result = await selectedCollection.insertOne(selectedClass);
-  res.send(result);
-})
-
-
    // get data in the myClasses 
    app.get('/classes/:instructorEmail',async(req,res)=>{
     const cursor = classCollection.find();
@@ -106,7 +98,21 @@ app.post ('/myselectedclass',async(req,res)=>{
     res.send(result)
    })
 
-  
+  // post for myselected component by classess
+app.post ('/myselectedclass',async(req,res)=>{
+  const selectedClass=req.body;
+  const result = await selectedCollection.insertOne(selectedClass);
+  res.send(result);
+})
+
+// get for myselected component...
+app.get('/myselectedclass/:studentEmail',async(req,res)=>{
+  const cursor = selectedCollection.find();
+  const result = await cursor.toArray();
+  res.send(result)
+ })
+
+
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
