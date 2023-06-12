@@ -1,13 +1,40 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+
 const app = express();
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const stripe = require("stripe")(process.env.Payment_Secret_Key);
+
 const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());
 app.use(cors());
+
+//jwt-- verify
+const verifiJWT = (req, res, next) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).send({ error: true, message: 'unauthorized access' });
+
+  }
+  //JWT--bearer token
+  const token = authorization.split(' ')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ erro: true, message: ' unathorized acess' })
+    }
+    req.decoded = decoded;
+    next()
+  })
+}
+
+
+
+
+
 
 /// MongoDB connection
 console.log(process.env.DB_USER);
@@ -31,7 +58,16 @@ async function run() {
     const usersCollection = client.db('sportCamp').collection('users');
    const classCollection =client.db('sportCamp').collection('classes')
    const selectedCollection =client.db('sportCamp').collection('selectedClass')
-
+  // JWT-- security 
+  app.post('/jwt', (req, res) => {
+    const user = req.body;
+    console.log(user);
+    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: '1h'
+    });
+    console.log(token);
+    res.send({ token })
+  })
    
 
     app.get('/users', async (req, res) => {
@@ -54,6 +90,30 @@ async function run() {
       
       
     });
+//todo for useAdmin and useInstructor
+app.get('/users/admin/:email', verifiJWT, async (req, res) => {
+  const email = req.params.email;
+  if (req.decoded.email !== email) {
+    res.send({ admin: false })
+  }
+  const query = { email: email };
+  const user = await usersCollection.findOne(query);
+  const result = { admin: user?.role === 'admin' };
+  res.send(result);
+})
+app.get('/users/instructor/:email', verifiJWT, async (req, res) => {
+  const email = req.params.email;
+  if (req.decoded.email !== email) {
+    res.send({ instructor: false })
+  }
+  const query = { email: email };
+  const user = await usersCollection.findOne(query);
+  const result = { instructor: user?.role === 'instructor' };
+  res.send(result);
+})
+
+
+
 ///role checking
   app.patch('/users/admin/:id',async(req,res)=>{
     const id = req.params.id;
@@ -104,7 +164,7 @@ app.post ('/myselectedclass',async(req,res)=>{
   const result = await selectedCollection.insertOne(selectedClass);
   res.send(result);
 })
-
+//todo jwt applied
 // get for myselected component...
 app.get('/myselectedclass/:studentEmail',async(req,res)=>{
   const cursor = selectedCollection.find();
@@ -120,7 +180,21 @@ app.get('/myselectedclass/:studentEmail',async(req,res)=>{
   res.send(result)
 })
 
-
+//payments....
+// app.post('/create-payment-intent',async(req,res)=>{
+//   const {price}=req.body;
+//   console.log('price.....',price)
+//   const amount= price * 100;
+//   console.log(price,amount)
+//   const paymentIntent = await stripe.paymentIntents.create({
+//     amount : amount,
+//     currency:'usd',
+//     payment_method_types : ['card']
+//   });
+//   res.send({
+//     clientSecret: paymentIntent.client_secret
+//   })
+// });
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
