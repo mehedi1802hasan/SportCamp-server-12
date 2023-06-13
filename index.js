@@ -138,7 +138,7 @@ app.get('/users/instructor/:email', verifiJWT, async (req, res) => {
     const result =await usersCollection.updateOne(filter,updateDoc);
     res.send(result)
   })
-/// TODO - update approved /denied classs
+/// TODO - update approved /denied/review classs
 app.get('/classes/',async(req,res)=>{
   const cursor = classCollection.find();
   const result = await cursor.toArray();
@@ -180,17 +180,7 @@ app.patch('/classes/review/:id', async (req, res) => {
   const result = await classCollection.updateOne(filter, updateDoc);
   res.send(result);
 });
-  // app.patch('/classes/approved/:id',async(req,res)=>{
-  //   const id = req.params.id;
-  //   const filter = {_id: new ObjectId(id)};
-  //   const updateDoc ={
-  //       $set : {
-  //           status: 'approved'
-  //       }
-  //   };
-  //   const result =await classCollection.updateOne(filter,updateDoc);
-  //   res.send(result)
-  // })
+  
 
 
 
