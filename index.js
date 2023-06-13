@@ -114,7 +114,7 @@ app.get('/users/instructor/:email', verifiJWT, async (req, res) => {
 
 
 
-///role checking
+///role checking upadate
   app.patch('/users/admin/:id',async(req,res)=>{
     const id = req.params.id;
     const filter = {_id: new ObjectId(id)};
@@ -138,6 +138,63 @@ app.get('/users/instructor/:email', verifiJWT, async (req, res) => {
     const result =await usersCollection.updateOne(filter,updateDoc);
     res.send(result)
   })
+/// TODO - update approved /denied classs
+app.get('/classes/',async(req,res)=>{
+  const cursor = classCollection.find();
+  const result = await cursor.toArray();
+  res.send(result)
+ })
+
+ app.patch('/classes/approved/:id', async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: {
+      status: 'approved'
+    }
+  };
+  const result = await classCollection.updateOne(filter, updateDoc);
+  res.send(result);
+});
+app.patch('/classes/denied/:id', async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: {
+      status: 'denied'
+    }
+  };
+  const result = await classCollection.updateOne(filter, updateDoc);
+  res.send(result);
+});
+
+app.patch('/classes/review/:id', async (req, res) => {
+  const id = req.params.id;
+  const reviewText = req.body.review;
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: {
+      review: reviewText,
+    },
+  };
+  const result = await classCollection.updateOne(filter, updateDoc);
+  res.send(result);
+});
+  // app.patch('/classes/approved/:id',async(req,res)=>{
+  //   const id = req.params.id;
+  //   const filter = {_id: new ObjectId(id)};
+  //   const updateDoc ={
+  //       $set : {
+  //           status: 'approved'
+  //       }
+  //   };
+  //   const result =await classCollection.updateOne(filter,updateDoc);
+  //   res.send(result)
+  // })
+
+
+
+
 /// geting for instructor page instructor list by 'role' ways..
 app.get('/users/instructors', async (req, res) => {
   const instructors = await usersCollection.find({ role: 'instructor' }).toArray();
@@ -152,12 +209,13 @@ app.get('/users/instructors', async (req, res) => {
    })
 
    // get data in the myClasses 
+
    app.get('/classes/:instructorEmail',async(req,res)=>{
     const cursor = classCollection.find();
     const result = await cursor.toArray();
     res.send(result)
    })
-
+  
   // post for myselected component by classess
 app.post ('/myselectedclass',async(req,res)=>{
   const selectedClass=req.body;
