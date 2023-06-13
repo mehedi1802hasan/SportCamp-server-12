@@ -57,7 +57,10 @@ async function run() {
     // Access the MongoDB collections and define routes here
     const usersCollection = client.db('sportCamp').collection('users');
    const classCollection =client.db('sportCamp').collection('classes')
-   const selectedCollection =client.db('sportCamp').collection('selectedClass')
+   const selectedCollection =client.db('sportCamp').collection('selectedClass');
+   const paymentCollection =client.db('sportCamp').collection('payments');
+
+
   // JWT-- security 
   app.post('/jwt', (req, res) => {
     const user = req.body;
@@ -219,7 +222,13 @@ app.get('/myselectedclass/:studentEmail',async(req,res)=>{
   const result = await cursor.toArray();
   res.send(result)
  })
-
+//TODO 
+app.get('/classese/:id', async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) }
+  const result = await selectedCollection.findOne(query)
+  res.send(result)
+})
  /// users delete...
  app.delete('/users/:id', async (req, res) => {
   const id = req.params.id;
@@ -229,21 +238,25 @@ app.get('/myselectedclass/:studentEmail',async(req,res)=>{
 })
 
 //payments....
-// app.post('/create-payment-intent',async(req,res)=>{
-//   const {price}=req.body;
-//   console.log('price.....',price)
-//   const amount= price * 100;
-//   console.log(price,amount)
-//   const paymentIntent = await stripe.paymentIntents.create({
-//     amount : amount,
-//     currency:'usd',
-//     payment_method_types : ['card']
-//   });
-//   res.send({
-//     clientSecret: paymentIntent.client_secret
-//   })
-// });
+app.post('/create-payment-intent',verifiJWT,async(req,res)=>{
+  const {price}=req.body;
+  const amount= price * 100;
+  console.log(price,amount)
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount : amount,
+    currency:'usd',
+    payment_method_types : ['card']
+  });
+  res.send({
+    clientSecret: paymentIntent.client_secret
+  })
+});
 
+app.post ('/payments',verifiJWT ,async(req,res)=>{
+  const payment= req.body;
+  const result = await paymentCollection.insertOne(payment);
+  res.send(result)
+})
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
     console.log('Pinged your deployment. You successfully connected to MongoDB!');
