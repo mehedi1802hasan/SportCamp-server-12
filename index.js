@@ -272,7 +272,7 @@ app.get('/payments',async(req,res)=>{
   const result = await cursor.toArray();
   res.send(result)
  })
-//popular class:
+//
 
 
 
