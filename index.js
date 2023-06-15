@@ -52,7 +52,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server (optional starting in v4.7)
-    await client.connect();
+   // await client.connect();
 
     // Access the MongoDB collections and define routes here
     const usersCollection = client.db('sportCamp').collection('users');
