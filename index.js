@@ -215,6 +215,14 @@ app.post ('/myselectedclass',async(req,res)=>{
   const result = await selectedCollection.insertOne(selectedClass);
   res.send(result);
 })
+//totdo delete
+app.delete('/myselectedclass/:id',async(req,res)=>{
+  const id =req.params.id;
+  const query = {_id : new ObjectId (id)};
+  const result = await selectedCollection.deleteOne(query);
+  res.send(result)
+})
+
 //todo jwt applied
 // get for myselected component...
 app.get('/myselectedclass/:studentEmail',async(req,res)=>{
@@ -257,6 +265,17 @@ app.post ('/payments',verifiJWT ,async(req,res)=>{
   const result = await paymentCollection.insertOne(payment);
   res.send(result)
 })
+
+// payment historey get...
+app.get('/payments',async(req,res)=>{
+  const cursor = paymentCollection.find();
+  const result = await cursor.toArray();
+  res.send(result)
+ })
+//popular class:
+
+
+
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
     console.log('Pinged your deployment. You successfully connected to MongoDB!');
